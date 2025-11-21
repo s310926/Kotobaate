@@ -10,21 +10,16 @@ kotoba = kotoba_a+kotoba_k+kotoba_s+kotoba_t
 answer = random.choice(kotoba)
 print(answer)
 
-input_answer = input("言葉を入力してください>>")
+# input_answer = input("言葉を入力してください>>")
 
-if input_answer == answer:
-    print("正解")
-elif input_answer[0] == answer[0]:
-    print("1文字目だけ正解")
-elif input_answer[1] == answer[1]:
-    print("2文字目だけ正解")
-elif input_answer[2] == answer[2]:
-    print("3文字目だけ正解")
-elif input_answer[3] == answer[3]:
-    print("4文字目だけ正解")
-elif input_answer[0:2] == answer[0:2]:
-    print("1文字と2文字目だけ正解")
-else:
-    print("不正解")
+while True: #正解するまでループ
+    input_answer = input("言葉を入力してください>>")
+    if input_answer == answer:
+        print("正解")
+        break
+    else :
+        for i in range(len(answer)):
+            if i < len(input_answer) and input_answer[i] == answer[i]:
+                print(f"{i+1}文字目が正解 ({answer[i]})")
+        print("もう一度挑戦しよう")
 
-#これにするとおかしい途中でif文終わる
