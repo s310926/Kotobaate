@@ -2,7 +2,7 @@ r"""
 Streamlit UIを使ったコードです。
 ・pip install streamlit
 実行は「ターミナル」で下記を打ち込みます
-python -m streamlit run "C:\Users\7Java15\Desktop\Kotobaate\Kotobaate4.py"
+python -m streamlit run "C:\Users\7Java15\Desktop\Kotobaate\Kotobaate5.py"
 そうすると最初は青文字でEmail：と聞いてきます。無視してリターンを押せば実行。
 その後は出てきません。
 
@@ -28,47 +28,64 @@ st.title("ことばあてゲーム～！")
 if "answer" not in st.session_state:
     st.session_state["answer"] = random.choice(kotoba)
 
+if "user_input" not in st.session_state:
+    st.session_state.user_input = ""
+
+def update_input():
+    st.session_state.user_input = st.session_state.temp_input
+
+st.text_input("４文字ことばを入力してください（やめるの入力で終了）", key="temp_input")
+
+
 if "typed" not in st.session_state:
     st.session_state.typed = ""
 
 
-user_input = st.text_input("４文字ことばを入力してください（やめるの入力で終了）")
+if "hint_list" not in st.session_state:
+    st.session_state.hint_list = []
+
+
+
+
 
 st.markdown("### 現在の入力")
 st.text(st.session_state.typed)
 
+if st.session_state.hint_list:
+    st.markdown("## ヒント")
+    for hint in st.session_state.hint_list:
+        st.write(hint)
+
 col_ok, col_yameru = st.columns([1,3])
-
-with col_yameru:
-    if user_input == "やめる" or st.button("やめる"):
-        st.write("ゲームを終了しました")
-    elif user_input == st.session_state.answer:
-        st.success("正解！！")
-
-        st.session_state.answer = random.choice(kotoba)
-
-    elif user_input:
-        for i in range(min(len(st.session_state.answer),len(user_input))):
-            if user_input[i] ==  st.session_state.answer[i]:
-                st.write(f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
-        st.write("もう一度挑戦しよう")
-
 
 
 with col_ok:
     if st.button("OK"):
-        if st.session_state.typed:
-            if st.session_state.typed == st.session_state.answer:
-                st.success("せいかい！")
-                st.session_state.answer = random.choice(kotoba)
-                st.session_state.typed = ""
+        check_word = st.session_state.typed if st.session_state.typed else st.session_state.temp_input
 
-            else:
-                for i in range(min(len(st.session_state.answer),len(st.session_state.typed))):
-                    if st.session_state.typed[i] ==  st.session_state.answer[i]:
-                        st.write(f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
-            st.write("もう一度挑戦しよう")
-            st.session_state.typed = ""
+        if check_word:
+                if check_word == st.session_state.answer:
+                    st.success("せいかい！")
+                    st.session_state.answer = random.choice(kotoba)
+                    st.session_state.typed = ""
+                    st.session_state.hint_list = []
+                    user_input = ""
+
+                else:
+                    for i in range(min(len(st.session_state.answer),len(check_word))):
+                        if check_word[i] ==  st.session_state.answer[i]:
+                            hint = (f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
+                            if hint not in st.session_state.hint_list:
+                                st.session_state.hint_list.append(hint)
+                    st.write("もう一度挑戦しよう")
+                    st.session_state.typed = ""
+
+with col_yameru:
+    if st.button("やめる"):
+        check_word = st.session_state.typed if st.session_state.typed else st.session_state.temp_input
+        if check_word == "やめる":
+            st.write("ゲームを終了しました")
+
 
 def is_hiragana(text):
     return all(('あ' <= ch <= 'ん' ) or ch == 'ー' for ch in text)
