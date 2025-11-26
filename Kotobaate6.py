@@ -28,65 +28,79 @@ st.title("ことばあてゲーム～！")
 if "answer" not in st.session_state:
     st.session_state["answer"] = random.choice(kotoba)
 
-if "user_input" not in st.session_state:
-    st.session_state.user_input = ""
-
-def update_input():
-    st.session_state.user_input = st.session_state.temp_input
-
-st.text_input("４文字ことばを入力してください（やめるの入力で終了）", key="temp_input")
-
-
-
-
 if "typed" not in st.session_state:
     st.session_state.typed = ""
-
 
 if "hint_list" not in st.session_state:
     st.session_state.hint_list = []
 
+st.text_input("４文字ことばを入力してください（やめるの入力で終了）", key="temp_input")
 
-
-
-
+current_input = st.session_state.typed + st.session_state.temp_input
 st.markdown("### 現在の入力")
-st.text(st.session_state.typed)
+st.text(current_input)
+
 
 if st.session_state.hint_list:
     st.markdown("## ヒント")
     for hint in st.session_state.hint_list:
         st.write(hint)
+def do_ok():
+    check_word = st.session_state.typed + st.session_state.temp_input
+    if not check_word:
+        return
+    if check_word == st.session_state.answer:
+        st.success("せいかい！")
+        st.session_state.answer = random.choice(kotoba)
+        st.session_state.typed = ""
+        st.session_state.hint_list = []
+    elif check_word == "やめる":
+        st.write("ゲームを終了しました")
+        st.session_state.typed = ""
+    else:
+        for i in range(min(len(st.session_state.answer),len(check_word))):
+            if check_word[i] ==  st.session_state.answer[i]:
+                hint = (f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
+                if hint not in st.session_state.hint_list:
+                    st.session_state.hint_list.append(hint)
+                st.write("もう一度チャレンジしよう")
+                st.session_state.typed = ""
+
+def do_quit():
+    st.write("ゲームを終了しました")
+    st.session_state.typed = ""
+    st.session_state.hint_list = []
 
 col_ok, col_yameru = st.columns([1,3])
-
-
 with col_ok:
-    if st.button("OK"):
-        check_word = st.session_state.typed if st.session_state.typed else st.session_state.temp_input
-
-        if check_word:
-                if check_word == st.session_state.answer:
-                    st.success("せいかい！")
-                    st.session_state.answer = random.choice(kotoba)
-                    st.session_state.typed = ""
-                    st.session_state.hint_list = []
-                    user_input = ""
-
-                else:
-                    for i in range(min(len(st.session_state.answer),len(check_word))):
-                        if check_word[i] ==  st.session_state.answer[i]:
-                            hint = (f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
-                            if hint not in st.session_state.hint_list:
-                                st.session_state.hint_list.append(hint)
-                    st.write("もう一度挑戦しよう")
-                    st.session_state.typed = ""
-
+    st.button("OK" , on_click= do_ok)
 with col_yameru:
-    if st.button("やめる"):
-        check_word = st.session_state.typed if st.session_state.typed else st.session_state.temp_input
-        if check_word == "やめる":
-            st.write("ゲームを終了しました")
+    st.button("やめる", on_click=do_quit)
+#     if st.button("OK"):
+#         check_word = st.session_state.typed + st.session_state.temp_input
+
+#         if check_word:
+#                 if check_word == st.session_state.answer:
+#                     st.success("せいかい！")
+#                     st.session_state.answer = random.choice(kotoba)
+#                     st.session_state.typed = ""
+#                     st.session_state.hint_list = []
+                    
+
+#                 else:
+                    # for i in range(min(len(st.session_state.answer),len(check_word))):
+                    #     if check_word[i] ==  st.session_state.answer[i]:
+                    #         hint = (f"{i+1}文字目が正解 ({st.session_state.answer[i]})")
+                            # if hint not in st.session_state.hint_list:
+                            #     st.session_state.hint_list.append(hint)
+#                     st.write("もう一度挑戦しよう")
+#                     st.session_state.typed = ""
+
+# with col_yameru:
+#     if st.button("やめる"):
+#         check_word = st.session_state.typed + st.session_state.temp_input
+#         if check_word == "やめる":
+#             st.write("ゲームを終了しました")
 
 
 def is_hiragana(text):
@@ -99,10 +113,10 @@ gojuon_columns = [
     ["な", "に", "ぬ", "ね", "の"],
     ["は", "ひ", "ふ", "へ", "ほ"],
     ["ま", "み", "む", "め", "も"],
-    ["や", "",  "ゆ", "",  "よ"],
+    ["や", "　", "ゆ", "　", "よ"],
     ["ら", "り", "る", "れ", "ろ"],
-    ["わ", "",  "",   "",  "を"],
-    ["",   "",  "",   "",  "ん"]
+    ["わ", "　", "　", "　", "を"],
+    ["　", "　", "　", "　", "ん"]
 ]
 
 gojuon_columns_sonota = [
@@ -138,6 +152,3 @@ for col2_idx, col2_chars in enumerate(gojuon_columns_sonota_reversed):
         for row_idx, char in enumerate(col2_chars):
             if char.strip() and st.button(char, key=f"btn_{char}_sonota_{col2_idx}_{row_idx}"):
                 st.session_state.typed += char
-
-#ヒントがあとから出てくる問題！！！
-#Kotobaate6で修正予定
